@@ -1,8 +1,6 @@
 # Portable JavaFX helpers — uruchom z katalogu repo:
 #   . .\fx.ps1
-#
-# Wymaga: JDK 21+ (u nas 25) w PATH oraz folder javafx-sdk/ w repo
-# (albo ustaw PATH_TO_FX na katalog lib SDK).
+
 
 $ErrorActionPreference = 'Stop'
 $RepoRoot = $PSScriptRoot

@@ -30,13 +30,6 @@ comp_FX HelloWorld.java
 run_FX HelloWorld
 ```
 
-Gra z `Zaj02`:
-
-```powershell
-cd Zaj02
-comp_FX Ball.java Simple_game_2.java
-run_FX Simple_game_2
-```
 
 ## Gdy coś nie działa
 
