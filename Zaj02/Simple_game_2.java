@@ -23,7 +23,10 @@ import javafx.util.Duration;
 public class Simple_game_2 extends Application implements ChangeListener<Number>
  {
   private static final int FRAME_WIDTH  = 640;
-  private static final int FRAME_HEIGHT = 480;  
+  private static final int FRAME_HEIGHT = 480;
+  private static final int GROUND_Y = 400;
+
+  Ball ball;
 
   int x, y;
 
@@ -46,9 +49,14 @@ public class Simple_game_2 extends Application implements ChangeListener<Number>
       primaryStage.setTitle("Volleyball");
 	
       canvas = new Canvas(FRAME_WIDTH, FRAME_HEIGHT);
-      canvas.setOnMousePressed(this::mouse);
+      canvas.setOnMousePressed(this::placeBall);
+      canvas.setOnMouseDragged(this::placeBall);
       
       gc = canvas.getGraphicsContext2D();
+
+      ball = new Ball();
+
+      drawFrame();
 
       x = 10;
       y = 10;
@@ -108,7 +116,23 @@ public class Simple_game_2 extends Application implements ChangeListener<Number>
       System.out.println("v=" + new_val);  
      }
 
+    private void drawFrame()
+    {
+     gc.setFill(Color.LIGHTBLUE);
+     gc.fillRect(0, 0, FRAME_WIDTH, FRAME_HEIGHT);
 
+     gc.setFill(Color.GREEN);
+     gc.fillRect(0, GROUND_Y, FRAME_WIDTH, FRAME_HEIGHT - GROUND_Y);
+
+     gc.setStroke(Color.WHITE);   // Kolor linii
+     gc.setLineWidth(4);          // Grubość linii
+     gc.strokeLine(FRAME_WIDTH / 2, GROUND_Y, FRAME_WIDTH / 2, GROUND_Y - 120);
+
+     if (ball != null) {
+      ball.draw(gc);
+     }
+
+    }
     
     private void step()
      {
@@ -116,11 +140,15 @@ public class Simple_game_2 extends Application implements ChangeListener<Number>
       gc.fillRect(x, y, 100, 100);      
       x+=10;
      }    
-   private void mouse(MouseEvent e)
+   private void placeBall(MouseEvent e)
     {
-     System.out.println("X=" + e.getX());
-     System.out.println("Y=" + e.getY());         
-    }   
+     ball.x = e.getX();
+     ball.y = e.getY();
+     if (ball.y > GROUND_Y - ball.radius) {
+      ball.y = GROUND_Y - ball.radius;
+     }
+     drawFrame();
+    }
     
    private void play(ActionEvent e)    
     {
@@ -134,4 +162,6 @@ public class Simple_game_2 extends Application implements ChangeListener<Number>
      
     }    
     
-}	
+}
+
+

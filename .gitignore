@@ -1,0 +1,20 @@
+# JavaFX SDK (duży, platformowy — każdy pobiera lokalnie, patrz README)
+javafx-sdk/
+
+# Kompilaty
+*.class
+out/
+
+# IntelliJ
+.idea/shelf/
+.idea/workspace.xml
+.idea/queries/
+.idea/dataSources/
+.idea/dataSources.local.xml
+.idea/httpRequests/
+
+# System / lokalne
+*.iml
+.DS_Store
+Thumbs.db
+hasla.txt
