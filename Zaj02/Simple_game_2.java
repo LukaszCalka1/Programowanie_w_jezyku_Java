@@ -17,6 +17,8 @@ import javafx.scene.paint.Color;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
+import javafx.scene.control.Label;
+
 
 
 
@@ -25,6 +27,8 @@ public class Simple_game_2 extends Application implements ChangeListener<Number>
   private static final int FRAME_WIDTH  = 640;
   private static final int FRAME_HEIGHT = 480;
   private static final int GROUND_Y = 400;
+  private static final double G = 9.81;
+
 
   Ball ball;
 
@@ -33,6 +37,9 @@ public class Simple_game_2 extends Application implements ChangeListener<Number>
   GraphicsContext gc;
   Canvas canvas;
   Slider alpha, v;
+  Timeline timeline;
+
+  boolean isPlaying = false;
 
       
   public static void main(String[] args) 
@@ -71,7 +78,7 @@ public class Simple_game_2 extends Application implements ChangeListener<Number>
       AnchorPane.setBottomAnchor( btn, 5.0d );
 
 
-      Slider alpha, v;
+      //Slider alpha, v;
 
       alpha = new Slider(30, 80, 5);
       alpha.setShowTickMarks(true);
@@ -83,24 +90,28 @@ public class Simple_game_2 extends Application implements ChangeListener<Number>
 			        System.out.println("alpha=" + new_val);  
 			       }
 			     });
-			       
-			       
-			       
-      root.getChildren().add(alpha);      
 
-      AnchorPane.setBottomAnchor( alpha, 2.0d );
-      AnchorPane.setLeftAnchor( alpha, 150.0d );      
+      Label alphaLabel = new Label("Kąt:");
+      HBox alphaBox = new HBox(5, alphaLabel, alpha);
+			       
+      root.getChildren().add(alphaBox);
+
+      AnchorPane.setBottomAnchor( alphaBox, 2.0d );
+      AnchorPane.setLeftAnchor( alphaBox, 150.0d );
       
       
       v = new Slider(10, 100, 10);
       v.setShowTickMarks(true);      
       v.setShowTickLabels(true);
       v.valueProperty().addListener(this::changed);
+
+      Label vLabel = new Label("Prędkość:");
+      HBox vBox = new HBox(5, vLabel, v);
       
-      root.getChildren().add(v);
+      root.getChildren().add(vBox);
             
-      AnchorPane.setBottomAnchor( v, 2.0d );
-      AnchorPane.setLeftAnchor( v, 300.0d );            
+      AnchorPane.setBottomAnchor( vBox, 2.0d );
+      AnchorPane.setLeftAnchor( vBox, 350.0d );
       
       Scene scene = new Scene(root);
       primaryStage.setTitle("Volleybal");
@@ -136,30 +147,90 @@ public class Simple_game_2 extends Application implements ChangeListener<Number>
     
     private void step()
      {
+      /*
       System.out.println("step");     
       gc.fillRect(x, y, 100, 100);      
       x+=10;
+      */
+
+      double dt = 0.1;
+
+
+      ball.x += ball.vx*dt;
+      ball.y += ball.vy*dt;
+
+      ball.vy += G * dt;
+
+      if (ball.y > GROUND_Y - ball.radius) {
+       ball.y = GROUND_Y - ball.radius;
+       isPlaying = false;
+       timeline.stop();
+      }
+
+      if (ball.x - ball.radius > FRAME_WIDTH || ball.x + ball.radius < 0) {
+       ball.x = 0;
+       ball.y = 0;
+       isPlaying = false;
+       timeline.stop();
+      }
+
+      drawFrame();
+
      }    
    private void placeBall(MouseEvent e)
     {
+     if (isPlaying) return;
+
      ball.x = e.getX();
      ball.y = e.getY();
-     if (ball.y > GROUND_Y - ball.radius) {
+
+     if (ball.x < 0) {   //lewa
+      ball.x = 0;
+     }
+
+      if (ball.x > FRAME_WIDTH ) { //prawa
+      ball.x = FRAME_WIDTH;
+     }
+
+     if (ball.y > GROUND_Y - ball.radius) {  //ziemia
       ball.y = GROUND_Y - ball.radius;
      }
+
+     if (ball.y < 0) {  //sufit
+      ball.y = 0;
+     }
+
      drawFrame();
     }
     
    private void play(ActionEvent e)    
     {
-     Timeline timeline;    
-     
+     /*
+     Timeline timeline;
+
      timeline = new Timeline(new KeyFrame(Duration.millis(200), e1->step()));
 
 //     timeline.setCycleCount(Timeline.INDEFINITE);
      timeline.setCycleCount(10);
      timeline.play();
-     
+     */
+
+     if (isPlaying) return;
+     isPlaying = true;
+
+     double angle = alpha.getValue();
+     double speed = v.getValue();
+
+     double rad = Math.toRadians(angle);
+
+     ball.vx = speed * Math.cos(rad);
+     ball.vy = -speed * Math.sin(rad);
+
+
+     timeline = new Timeline(new KeyFrame(Duration.millis(20), e1->step()));
+
+     timeline.setCycleCount(Timeline.INDEFINITE);
+     timeline.play();
     }    
     
 }
