@@ -20,191 +20,207 @@ import javafx.util.Duration;
 import javafx.scene.control.Label;
 
 
+public class Simple_game_2 extends Application implements ChangeListener<Number>{
+    private static final int FRAME_WIDTH = 640;
+    private static final int FRAME_HEIGHT = 480;
+    private static final int GROUND_Y = 400;
+    private static final double G = 9.81;
+    private static final int NET_X = 320;
+    private static final int NET_TOP_Y = GROUND_Y - 120;
+    private static final double BOUNCE = 0.4;
 
 
-public class Simple_game_2 extends Application implements ChangeListener<Number>
- {
-  private static final int FRAME_WIDTH  = 640;
-  private static final int FRAME_HEIGHT = 480;
-  private static final int GROUND_Y = 400;
-  private static final double G = 9.81;
+    Ball ball;
+
+    int x, y;
+
+    GraphicsContext gc;
+    Canvas canvas;
+    Slider alpha, v;
+    Timeline timeline;
+
+    boolean isPlaying = false;
 
 
-  Ball ball;
-
-  int x, y;
-
-  GraphicsContext gc;
-  Canvas canvas;
-  Slider alpha, v;
-  Timeline timeline;
-
-  boolean isPlaying = false;
-
-      
-  public static void main(String[] args) 
-   {
-    launch(args);
-   }
+    public static void main( String[] args ){
+        launch( args );
+    }
 
 
-    
     @Override
-    public void start(Stage primaryStage) 
-     {
-      AnchorPane root = new AnchorPane();
-      primaryStage.setTitle("Volleyball");
-	
-      canvas = new Canvas(FRAME_WIDTH, FRAME_HEIGHT);
-      canvas.setOnMousePressed(this::placeBall);
-      canvas.setOnMouseDragged(this::placeBall);
-      
-      gc = canvas.getGraphicsContext2D();
+    public void start( Stage primaryStage ){
+        AnchorPane root = new AnchorPane();
+        primaryStage.setTitle( "Volleyball" );
 
-      ball = new Ball();
+        canvas = new Canvas( FRAME_WIDTH, FRAME_HEIGHT );
+        canvas.setOnMousePressed( this::placeBall );
+        canvas.setOnMouseDragged( this::placeBall );
 
-      drawFrame();
+        gc = canvas.getGraphicsContext2D();
 
-      x = 10;
-      y = 10;
-      	
-      root.getChildren().add(canvas);	
-	
-      Button btn = new Button();
-      btn.setText("Play");
-      btn.setOnAction(this::play);	
+        ball = new Ball();
 
-      root.getChildren().add(btn);
-      AnchorPane.setBottomAnchor( btn, 5.0d );
+        drawFrame();
+
+        x = 10;
+        y = 10;
+
+        root.getChildren().add( canvas );
+
+        Button btn = new Button();
+        btn.setText( "Play" );
+        btn.setOnAction( this::play );
+
+        root.getChildren().add( btn );
+        AnchorPane.setBottomAnchor( btn, 5.0d );
 
 
-      //Slider alpha, v;
+        //Slider alpha, v;
 
-      alpha = new Slider(30, 80, 5);
-      alpha.setShowTickMarks(true);
-      alpha.setShowTickLabels(true);
-      alpha.valueProperty().addListener(new ChangeListener<Number>() 
-                             {
-                              public void changed(ObservableValue<? extends Number> ov, Number old_val, Number new_val) 
-			       {    
-			        System.out.println("alpha=" + new_val);  
-			       }
-			     });
+        alpha = new Slider( 30, 80, 5 );
+        alpha.setShowTickMarks( true );
+        alpha.setShowTickLabels( true );
+        alpha.valueProperty().addListener( new ChangeListener<Number>(){
+            public void changed( ObservableValue<? extends Number> ov, Number old_val, Number new_val ){
+                System.out.println( "alpha=" + new_val );
+            }
+        } );
 
-      Label alphaLabel = new Label("Kąt:");
-      HBox alphaBox = new HBox(5, alphaLabel, alpha);
-			       
-      root.getChildren().add(alphaBox);
+        Label alphaLabel = new Label( "Kąt:" );
+        HBox alphaBox = new HBox( 5, alphaLabel, alpha );
 
-      AnchorPane.setBottomAnchor( alphaBox, 2.0d );
-      AnchorPane.setLeftAnchor( alphaBox, 150.0d );
-      
-      
-      v = new Slider(10, 100, 10);
-      v.setShowTickMarks(true);      
-      v.setShowTickLabels(true);
-      v.valueProperty().addListener(this::changed);
+        root.getChildren().add( alphaBox );
 
-      Label vLabel = new Label("Prędkość:");
-      HBox vBox = new HBox(5, vLabel, v);
-      
-      root.getChildren().add(vBox);
-            
-      AnchorPane.setBottomAnchor( vBox, 2.0d );
-      AnchorPane.setLeftAnchor( vBox, 350.0d );
-      
-      Scene scene = new Scene(root);
-      primaryStage.setTitle("Volleybal");
-      primaryStage.setScene( scene );
-      primaryStage.setWidth(FRAME_WIDTH + 10);
-      primaryStage.setHeight(FRAME_HEIGHT+ 80);
-      primaryStage.show();   
+        AnchorPane.setBottomAnchor( alphaBox, 2.0d );
+        AnchorPane.setLeftAnchor( alphaBox, 150.0d );
+
+
+        v = new Slider( 10, 100, 10 );
+        v.setShowTickMarks( true );
+        v.setShowTickLabels( true );
+        v.valueProperty().addListener( this::changed );
+
+        Label vLabel = new Label( "Prędkość:" );
+        HBox vBox = new HBox( 5, vLabel, v );
+
+        root.getChildren().add( vBox );
+
+        AnchorPane.setBottomAnchor( vBox, 2.0d );
+        AnchorPane.setLeftAnchor( vBox, 350.0d );
+
+        Scene scene = new Scene( root );
+        primaryStage.setTitle( "Volleybal" );
+        primaryStage.setScene( scene );
+        primaryStage.setWidth( FRAME_WIDTH + 10 );
+        primaryStage.setHeight( FRAME_HEIGHT + 80 );
+        primaryStage.show();
     }
 
 
-    public void changed(ObservableValue<? extends Number> ov, Number old_val, Number new_val) 
-     {    
-      System.out.println("v=" + new_val);  
-     }
+    public void changed( ObservableValue<? extends Number> ov, Number old_val, Number new_val ){
+        System.out.println( "v=" + new_val );
+    }
 
-    private void drawFrame()
-    {
-     gc.setFill(Color.LIGHTBLUE);
-     gc.fillRect(0, 0, FRAME_WIDTH, FRAME_HEIGHT);
+    private void drawFrame(){
+        gc.setFill( Color.LIGHTBLUE );
+        gc.fillRect( 0, 0, FRAME_WIDTH, FRAME_HEIGHT );
 
-     gc.setFill(Color.GREEN);
-     gc.fillRect(0, GROUND_Y, FRAME_WIDTH, FRAME_HEIGHT - GROUND_Y);
+        gc.setFill( Color.GREEN );
+        gc.fillRect( 0, GROUND_Y, FRAME_WIDTH, FRAME_HEIGHT - GROUND_Y );
 
-     gc.setStroke(Color.WHITE);   // Kolor linii
-     gc.setLineWidth(4);          // Grubość linii
-     gc.strokeLine(FRAME_WIDTH / 2, GROUND_Y, FRAME_WIDTH / 2, GROUND_Y - 120);
+        gc.setStroke( Color.WHITE );   // Kolor linii
+        gc.setLineWidth( 4 );          // Grubość linii
+        gc.strokeLine( FRAME_WIDTH/2, GROUND_Y, NET_X, NET_TOP_Y );
 
-     if (ball != null) {
-      ball.draw(gc);
-     }
+        if( ball != null ){
+            ball.draw( gc );
+        }
 
     }
-    
-    private void step()
-     {
+
+    private void step(){
       /*
       System.out.println("step");     
       gc.fillRect(x, y, 100, 100);      
       x+=10;
       */
 
-      double dt = 0.1;
+        double dt = 0.1;
 
 
-      ball.x += ball.vx*dt;
-      ball.y += ball.vy*dt;
+        ball.x += ball.vx*dt;
+        ball.y += ball.vy*dt;
 
-      ball.vy += G * dt;
+        ball.vy += G*dt;
 
-      if (ball.y > GROUND_Y - ball.radius) {
-       ball.y = GROUND_Y - ball.radius;
-       isPlaying = false;
-       timeline.stop();
-      }
+        if( ball.y > GROUND_Y - ball.radius ){
+            ball.y = GROUND_Y - ball.radius;
+            isPlaying = false;
+            timeline.stop();
+        }
 
-      if (ball.x - ball.radius > FRAME_WIDTH || ball.x + ball.radius < 0) {
-       ball.x = 0;
-       ball.y = 0;
-       isPlaying = false;
-       timeline.stop();
-      }
+        if( ball.x - ball.radius > FRAME_WIDTH || ball.x + ball.radius < 0 ){
+            ball.x = 0;
+            ball.y = 0;
+            isPlaying = false;
+            timeline.stop();
+        }
 
-      drawFrame();
 
-     }    
-   private void placeBall(MouseEvent e)
-    {
-     if (isPlaying) return;
+        if( ball.y > NET_TOP_Y - ball.radius ){  //wysokosc siatki
+            if( ball.x > NET_X - ball.radius && ball.x <= NET_X ){   //lewo
+                ball.x = NET_X - ball.radius;
+                ball.vx = -ball.vx * BOUNCE;
+                ball.vy = ball.vy * BOUNCE;
+            } else if( ball.x < NET_X + ball.radius && ball.x >= NET_X ){  //prawo
+                ball.x = NET_X + ball.radius;
+                ball.vx = -ball.vx * BOUNCE;
+                ball.vy = ball.vy * BOUNCE;
+            }
+        }
 
-     ball.x = e.getX();
-     ball.y = e.getY();
 
-     if (ball.x < 0) {   //lewa
-      ball.x = 0;
-     }
 
-      if (ball.x > FRAME_WIDTH ) { //prawa
-      ball.x = FRAME_WIDTH;
-     }
+        drawFrame();
 
-     if (ball.y > GROUND_Y - ball.radius) {  //ziemia
-      ball.y = GROUND_Y - ball.radius;
-     }
-
-     if (ball.y < 0) {  //sufit
-      ball.y = 0;
-     }
-
-     drawFrame();
     }
-    
-   private void play(ActionEvent e)    
-    {
+
+    private void placeBall( MouseEvent e ){
+        if( isPlaying ) return;
+
+        ball.x = e.getX();
+        ball.y = e.getY();
+
+        if( ball.x < 0 ){   //lewa
+            ball.x = 0;
+        }
+
+        if( ball.x > FRAME_WIDTH ){ //prawa
+            ball.x = FRAME_WIDTH;
+        }
+
+        if( ball.y > GROUND_Y - ball.radius ){  //ziemia
+            ball.y = GROUND_Y - ball.radius;
+        }
+
+        if( ball.y < 0 ){  //sufit
+            ball.y = 0;
+        }
+
+
+        if( ball.y > NET_TOP_Y - ball.radius ){  //wysokosc siatki
+            if( ball.x > NET_X - ball.radius && ball.x <= NET_X ){   //lewo
+                ball.x = NET_X - ball.radius;
+            } else if( ball.x < NET_X + ball.radius && ball.x >= NET_X ){  //prawo
+                ball.x = NET_X + ball.radius;
+            }
+        }
+
+
+        drawFrame();
+    }
+
+    private void play( ActionEvent e ){
      /*
      Timeline timeline;
 
@@ -215,24 +231,24 @@ public class Simple_game_2 extends Application implements ChangeListener<Number>
      timeline.play();
      */
 
-     if (isPlaying) return;
-     isPlaying = true;
+        if( isPlaying ) return;
+        isPlaying = true;
 
-     double angle = alpha.getValue();
-     double speed = v.getValue();
+        double angle = alpha.getValue();
+        double speed = v.getValue();
 
-     double rad = Math.toRadians(angle);
+        double rad = Math.toRadians( angle );
 
-     ball.vx = speed * Math.cos(rad);
-     ball.vy = -speed * Math.sin(rad);
+        ball.vx = speed*Math.cos( rad );
+        ball.vy = -speed*Math.sin( rad );
 
 
-     timeline = new Timeline(new KeyFrame(Duration.millis(20), e1->step()));
+        timeline = new Timeline( new KeyFrame( Duration.millis( 20 ), e1 -> step() ) );
 
-     timeline.setCycleCount(Timeline.INDEFINITE);
-     timeline.play();
-    }    
-    
+        timeline.setCycleCount( Timeline.INDEFINITE );
+        timeline.play();
+    }
+
 }
 
 
