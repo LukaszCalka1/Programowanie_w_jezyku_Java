@@ -6,15 +6,9 @@ javafx-sdk/
 out/
 
 # IntelliJ
-.idea/shelf/
-.idea/workspace.xml
-.idea/queries/
-.idea/dataSources/
-.idea/dataSources.local.xml
-.idea/httpRequests/
+.idea/
+*.iml
 
 # System / lokalne
-*.iml
 .DS_Store
 Thumbs.db
-
